@@ -92,6 +92,7 @@ public class AuthUI : MonoBehaviour
             donationCurrency = msg.donationCurrency,
             level = msg.level
         };
+
         SceneTransitionManager.Instance.StartGameLoad();
     }
 
