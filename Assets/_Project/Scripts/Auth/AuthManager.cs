@@ -17,11 +17,12 @@ public class AuthManager : NetworkBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
 
         string basePath = Directory.GetCurrentDirectory();
-        _accountsFilePath = Path.Combine(basePath, "Accounts.json");
-        _playerDataDirectory = Path.Combine(basePath, "PlayerData");
+        _accountsFilePath = Path.Combine(basePath, Constants.AccountsFileName);
+        _playerDataDirectory = Path.Combine(basePath, Constants.PlayerDataFileName);
 
         if (Directory.Exists(_playerDataDirectory) == false)
             Directory.CreateDirectory(_playerDataDirectory);
@@ -59,7 +60,9 @@ public class AuthManager : NetworkBehaviour
                 success = false,
                 message = "Логин уже существует."
             };
+
             conn.Send(response);
+
             return;
         }
 
@@ -82,6 +85,7 @@ public class AuthManager : NetworkBehaviour
             donationCurrency = 0,
             level = 1
         };
+
         SavePlayerData(account.id, playerData);
 
         RegisterResponseMessage successResponse = new()
@@ -89,6 +93,7 @@ public class AuthManager : NetworkBehaviour
             success = true,
             message = "Регистрация успешна."
         };
+
         conn.Send(successResponse);
         Debug.Log("Регистрация успешна для логина: " + msg.login);
     }
@@ -119,6 +124,7 @@ public class AuthManager : NetworkBehaviour
                 success = false,
                 message = "Неверный пароль."
             };
+
             conn.Send(response);
             return;
         }
@@ -142,11 +148,14 @@ public class AuthManager : NetworkBehaviour
         {
             AccountsDatabase emptyDB = new();
             SaveAccountsDatabase(emptyDB);
+
             return emptyDB;
         }
+
         string json = File.ReadAllText(_accountsFilePath);
         AccountsDatabase db = JsonUtility.FromJson<AccountsDatabase>(json);
         db ??= new AccountsDatabase();
+
         return db;
     }
 
@@ -158,7 +167,7 @@ public class AuthManager : NetworkBehaviour
 
     private void SavePlayerData(string accountId, PlayerData playerData)
     {
-        string fileName = accountId + ".json";
+        string fileName = $"{ accountId}{Constants.JsonExtension}";
         string path = Path.Combine(_playerDataDirectory, fileName);
         string json = JsonUtility.ToJson(playerData, true);
         File.WriteAllText(path, json);
@@ -166,8 +175,9 @@ public class AuthManager : NetworkBehaviour
 
     private PlayerData LoadPlayerData(string accountId)
     {
-        string fileName = accountId + ".json";
+        string fileName = $"{accountId}{Constants.JsonExtension}";
         string path = Path.Combine(_playerDataDirectory, fileName);
+
         if (File.Exists(path) == true)
         {
             string json = File.ReadAllText(path);

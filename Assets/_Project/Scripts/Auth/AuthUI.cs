@@ -24,13 +24,16 @@ public class AuthUI : MonoBehaviour
     [SerializeField] private GameObject _authCanvas;
     [SerializeField] private TMP_Text _playerInfoText;
 
-    private void Start()
+    private void OnEnable()
     {
-        if (_registerButton != null)
-            _registerButton.onClick.AddListener(OnRegisterButtonClicked);
+        _registerButton.onClick.AddListener(OnRegisterButtonClicked);
+        _loginButton.onClick.AddListener(OnLoginButtonClicked);
+    }
 
-        if (_loginButton != null)
-            _loginButton.onClick.AddListener(OnLoginButtonClicked);
+    private void OnDisable()
+    {
+        _registerButton.onClick.RemoveListener(OnRegisterButtonClicked);
+        _loginButton.onClick.RemoveListener(OnLoginButtonClicked);
     }
 
     public void OnRegisterButtonClicked()
@@ -82,7 +85,7 @@ public class AuthUI : MonoBehaviour
             return;
         }
 
-        //_loginFeedbackText.text = msg.message;
+        _loginFeedbackText.text = msg.message;
 
         Debug.Log("Полученный JSON игрока: " + msg.playerDataJson);
 
@@ -93,6 +96,7 @@ public class AuthUI : MonoBehaviour
         }
 
         PlayerData playerData = JsonUtility.FromJson<PlayerData>(msg.playerDataJson);
+
         if (playerData == null)
         {
             Debug.LogError("Ошибка десериализации JSON игрока: " + msg.playerDataJson);
@@ -114,8 +118,5 @@ public class AuthUI : MonoBehaviour
         {
             Debug.LogWarning("PlayerInfoText не назначен в инспекторе!");
         }
-
-        //if (_authCanvas != null)
-        //    _authCanvas.SetActive(false);
     }
 }

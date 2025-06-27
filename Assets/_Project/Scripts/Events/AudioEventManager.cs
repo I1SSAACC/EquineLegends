@@ -4,6 +4,7 @@ namespace Events
 {
     public class AudioEventManager : MonoBehaviour
     {
+        [SerializeField] private SfxPlayer _player;
         public AudioSource audioSource;
         [Range(0, 1)]
         public float footstepsVolume = 1f;
@@ -26,38 +27,35 @@ namespace Events
         [Range(0, 1)]
         public float potionVolume = 1f;
         public AudioClip potionClip;
-        
 
-        public void PlayFootsteps()
-        {
-            audioSource.PlayOneShot(footstepsClip, footstepsVolume);
-        }
-        
+        public void PlayFootsteps() =>
+            _player.PlayFootsteps();
+
         public void PlayAttack()
         {
             audioSource.PlayOneShot(attackClip, attackVolume);
         }
-        
+
         public void PlaySkill()
         {
             audioSource.PlayOneShot(skillClip, skillVolume);
         }
-        
+
         public void PlayDie()
         {
             audioSource.PlayOneShot(dieClip, dieVolume);
         }
-        
+
         public void PlayHurt()
         {
             audioSource.PlayOneShot(hurtClip, hurtVolume);
         }
-        
+
         public void PlayBlock()
         {
             audioSource.PlayOneShot(blockClip, blockVolume);
         }
-        
+
         public void PlayPotion()
         {
             audioSource.PlayOneShot(potionClip, potionVolume);

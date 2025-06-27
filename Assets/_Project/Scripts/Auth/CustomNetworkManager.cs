@@ -4,12 +4,7 @@ using UnityEngine;
 
 public class CustomNetworkManager : NetworkManager
 {
-    [Header("Auto Start Options")]
-    [Tooltip("Если включено, то при запуске проекта запускается сразу сервер. Если отключено, запускается клиент.")]
     [SerializeField] private bool autoStartServer = false;
-
-    [Header("Maintenance Options")]
-    [Tooltip("Если включено, новые подключения отключаются (режим ТО active).")]
     [SerializeField] private bool maintenanceMode = false;
 
     private bool hasDisconnectedClients = false;
@@ -48,10 +43,11 @@ public class CustomNetworkManager : NetworkManager
             conn.Disconnect();
             return;
         }
+
         base.OnServerConnect(conn);
     }
 
-    void Update()
+    public override void Update()
     {
         if (maintenanceMode && !hasDisconnectedClients && NetworkServer.active && NetworkServer.connections.Count > 0)
             DisconnectAllClients();
@@ -68,9 +64,11 @@ public class CustomNetworkManager : NetworkManager
             conn.Send(new MaintenanceMessage { active = true });
             conn.Disconnect();
         }
+
         hasDisconnectedClients = true;
     }
 }
+
 public struct MaintenanceMessage : NetworkMessage
 {
     public bool active;
