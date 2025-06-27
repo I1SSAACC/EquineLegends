@@ -10,6 +10,9 @@ public class AuthManager : NetworkBehaviour
     private string _accountsFilePath;
     private string _playerDataDirectory;
 
+    [HideInInspector]
+    public PlayerData CurrentPlayerData;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -105,40 +108,47 @@ public class AuthManager : NetworkBehaviour
         string hashedPassword = Utils.ComputeSHA512Hash(msg.password);
         AccountsDatabase db = LoadAccountsDatabase();
 
-        AccountInfo account = db.accounts.Find(acc => acc.login.Equals(msg.login, StringComparison.OrdinalIgnoreCase));
+        AccountInfo account = db.accounts
+            .Find(acc => acc.login.Equals(msg.login, StringComparison.OrdinalIgnoreCase));
+
+        var response = new LoginResponseMessage();
+
         if (account == null)
         {
-            LoginResponseMessage response = new ()
-            {
-                success = false,
-                message = "Аккаунт не найден."
-            };
+            response.success = false;
+            response.message = "Аккаунт не найден.";
             conn.Send(response);
             return;
         }
 
         if (account.passwordHash != hashedPassword)
         {
-            LoginResponseMessage response = new()
-            {
-                success = false,
-                message = "Неверный пароль."
-            };
-
+            response.success = false;
+            response.message = "Неверный пароль.";
             conn.Send(response);
             return;
         }
 
-        PlayerData playerData = LoadPlayerData(account.id);
-        string playerDataJson = JsonUtility.ToJson(playerData);
-        LoginResponseMessage successResponse = new()
+        // Загружаем PlayerData с диска
+        PlayerData pd = LoadPlayerData(account.id);
+        if (pd == null)
         {
-            success = true,
-            message = "Авторизация успешна.",
-            accountId = account.id,
-            playerDataJson = playerDataJson
-        };
-        conn.Send(successResponse);
+            response.success = false;
+            response.message = "Ошибка загрузки данных игрока.";
+            conn.Send(response);
+            return;
+        }
+
+        // Формируем успешный ответ
+        response.success = true;
+        response.message = "Авторизация успешна.";
+        response.accountId = account.id;
+        response.nickname = pd.nickname;
+        response.gameCurrency = pd.gameCurrency;
+        response.donationCurrency = pd.donationCurrency;
+        response.level = pd.level;
+
+        conn.Send(response);
         Debug.Log("Авторизация успешна для логина: " + msg.login);
     }
 
@@ -194,6 +204,20 @@ public class AuthManager : NetworkBehaviour
     private void OnRegisterResponse(RegisterResponseMessage msg) =>
         Debug.Log("Ответ регистрации (клиент): " + msg.message);
 
-    private void OnLoginResponse(LoginResponseMessage msg) =>
-        Debug.Log("Ответ авторизации (клиент): " + msg.message);
+    private void OnLoginResponse(LoginResponseMessage msg)
+    {
+        if (!msg.success) return;
+
+        CurrentPlayerData = new PlayerData
+        {
+            id = msg.accountId,
+            nickname = msg.nickname,
+            gameCurrency = msg.gameCurrency,
+            donationCurrency = msg.donationCurrency,
+            level = msg.level
+        };
+
+        // Запускаем переход на загрузку сцены
+        SceneTransitionManager.Instance.StartGameLoad();
+    }
 }

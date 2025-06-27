@@ -78,45 +78,21 @@ public class AuthUI : MonoBehaviour
 
     private void OnLoginResponse(LoginResponseMessage msg)
     {
-        Debug.Log("OnLoginResponse в AuthUI запущен!");
-        if (msg.success == false)
+        if (!msg.success)
         {
-            _loginFeedbackText.text = "Ошибка авторизации: " + msg.message;
+            _loginFeedbackText.text = $"Ошибка авторизации: {msg.message}";
             return;
         }
 
-        _loginFeedbackText.text = msg.message;
-
-        Debug.Log("Полученный JSON игрока: " + msg.playerDataJson);
-
-        if (string.IsNullOrEmpty(msg.playerDataJson) == true)
+        AuthManager.Instance.CurrentPlayerData = new PlayerData
         {
-            Debug.LogWarning("Не найден JSON с данными игрока.");
-            return;
-        }
-
-        PlayerData playerData = JsonUtility.FromJson<PlayerData>(msg.playerDataJson);
-
-        if (playerData == null)
-        {
-            Debug.LogError("Ошибка десериализации JSON игрока: " + msg.playerDataJson);
-            return;
-        }
-
-        Debug.Log($"ID: {playerData.id} | Ник: {playerData.nickname} | Уровень: {playerData.level} | Валюта: {playerData.gameCurrency} | Донат: {playerData.donationCurrency}");
-
-        if (_playerInfoText != null)
-        {
-            _playerInfoText.text =
-                $"ID: {playerData.id}\n" +
-                $"Ник: {playerData.nickname}\n" +
-                $"Уровень: {playerData.level}\n" +
-                $"Валюта: {playerData.gameCurrency}\n" +
-                $"Донат: {playerData.donationCurrency}";
-        }
-        else
-        {
-            Debug.LogWarning("PlayerInfoText не назначен в инспекторе!");
-        }
+            id = msg.accountId,
+            nickname = msg.nickname,
+            gameCurrency = msg.gameCurrency,
+            donationCurrency = msg.donationCurrency,
+            level = msg.level
+        };
+        SceneTransitionManager.Instance.StartGameLoad();
     }
+
 }

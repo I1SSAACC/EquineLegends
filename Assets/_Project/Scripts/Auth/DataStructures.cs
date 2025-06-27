@@ -51,5 +51,8 @@ public struct LoginResponseMessage : NetworkMessage
     public bool success;
     public string message;
     public string accountId;
-    public string playerDataJson;
+    public string nickname;
+    public int gameCurrency;
+    public int donationCurrency;
+    public int level;
 }
