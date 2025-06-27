@@ -5,12 +5,10 @@ using UnityEngine.UI;
 
 public class SceneTransitionManager : MonoBehaviour
 {
-    public static SceneTransitionManager Instance { get; private set; }
+    public float progressSmoothSpeed = 1.5f;
 
     public CanvasGroup loadingCanvas;
-
     public Slider loadingSlider;
-
     public string gameSceneName = "Game";
     public float fadeDuration = 0.5f;
 
@@ -25,7 +23,9 @@ public class SceneTransitionManager : MonoBehaviour
 
     public void StartGameLoad()
     {
-        if (loadingCanvas != null) loadingCanvas.gameObject.SetActive(true);
+        if (loadingCanvas != null)
+            loadingCanvas.gameObject.SetActive(true);
+
         if (loadingSlider != null)
         {
             loadingSlider.minValue = 0f;
@@ -40,20 +40,45 @@ public class SceneTransitionManager : MonoBehaviour
     {
         yield return FadeCanvas(loadingCanvas, 0f, 1f);
 
-        AsyncOperation op = SceneManager.LoadSceneAsync(gameSceneName);
+        var op = SceneManager.LoadSceneAsync(gameSceneName);
+        op.allowSceneActivation = false;
+
+        float displayedProgress = 0f;
+
+        while (op.progress < 0.9f)
+        {
+            float targetProgress = Mathf.Clamp01(op.progress / 0.9f);
+
+            displayedProgress = Mathf.MoveTowards(
+                displayedProgress,
+                targetProgress,
+                Time.deltaTime * progressSmoothSpeed
+            );
+
+            loadingSlider.value = displayedProgress;
+            yield return null;
+        }
+
+        while (displayedProgress < 1f)
+        {
+            displayedProgress = Mathf.MoveTowards(
+                displayedProgress,
+                1f,
+                Time.deltaTime * progressSmoothSpeed
+            );
+
+            loadingSlider.value = displayedProgress;
+            yield return null;
+        }
+
         op.allowSceneActivation = true;
 
         while (!op.isDone)
-        {
-            float prog = Mathf.Clamp01(op.progress / 0.9f);
-            if (loadingSlider != null) loadingSlider.value = prog;
             yield return null;
-        }
 
         yield return new WaitForSeconds(0.2f);
 
         yield return FadeCanvas(loadingCanvas, 1f, 0f);
-
         loadingCanvas.interactable = false;
         loadingCanvas.blocksRaycasts = false;
 
@@ -81,4 +106,6 @@ public class SceneTransitionManager : MonoBehaviour
         if (gameUI != null && AuthManager.Instance.CurrentPlayerData != null)
             gameUI.SetupPlayerInfo(AuthManager.Instance.CurrentPlayerData);
     }
+
+    public static SceneTransitionManager Instance { get; private set; }
 }
