@@ -29,6 +29,8 @@ namespace MalbersAnimations
         public float m_TiltMax = 75f;                               // The maximum value of the x axis rotation of the pivot.
         public float m_TiltMin = 45f;                               // The minimum value of the x axis rotation of the pivot.
 
+        [SerializeField] private MouseSensitivitySlider _mouseSensitivitySlider;
+
         [Header("Camera Input Axis")]
         public InputAxis Vertical = new InputAxis("Mouse Y", true, false);
         public InputAxis Horizontal = new InputAxis("Mouse X", true, false);
@@ -185,12 +187,14 @@ namespace MalbersAnimations
 
         private void HandleRotationMovement(float time)
         {
+            float mouseSensitivitySliderValue = _mouseSensitivitySlider.Value;
+
             if (Time.timeScale < float.Epsilon) return;
 
             if (Horizontal.active) XCam = Horizontal.GetAxis;
             if (Vertical.active) YCam = Vertical.GetAxis;
 
-            m_LookAngle += XCam * m_TurnSpeed;                                                     // Adjust the look angle by an amount proportional to the turn speed and horizontal input.
+            m_LookAngle += XCam * m_TurnSpeed * mouseSensitivitySliderValue;                                                     // Adjust the look angle by an amount proportional to the turn speed and horizontal input.
 
             if (TargetGravity != null) m_UpVector = Vector3.Slerp(m_UpVector, TargetGravity.UpVector, time * 15);
             // transform.rotation = Quaternion.FromToRotation(transform.up, m_UpVector) * transform.rotation; //This Make it f
@@ -198,7 +202,7 @@ namespace MalbersAnimations
 
             m_TransformTargetRot = Quaternion.Euler(0f, m_LookAngle, 0f);                       // Rotate the rig (the root object) around Y axis only:
 
-            m_TiltAngle -= YCam * m_TurnSpeed;                                                 // on platforms with a mouse, we adjust the current angle based on Y mouse input and turn speed
+            m_TiltAngle -= YCam * m_TurnSpeed * mouseSensitivitySliderValue;                                                 // on platforms with a mouse, we adjust the current angle based on Y mouse input and turn speed
             m_TiltAngle = Mathf.Clamp(m_TiltAngle, -m_TiltMin, m_TiltMax);                  // and make sure the new value is within the tilt range
 
             m_PivotTargetRot = Quaternion.Euler(m_TiltAngle, m_PivotEulers.y, m_PivotEulers.z); // Tilt input around X is applied to the pivot (the child of this object)
