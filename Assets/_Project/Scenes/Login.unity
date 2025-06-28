@@ -326,7 +326,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f29ffc9b409377b4a8f073a99ff49f80, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 61d675488000dcc46a78c58436f7e090, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2262,6 +2262,7 @@ MonoBehaviour:
   _sfxPlayer: {fileID: 1274482570}
   _logInPanel: {fileID: 8077453494985492888}
   _signUpPanel: {fileID: 1141399692}
+  _settingsPanel: {fileID: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -8296,7 +8297,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f29ffc9b409377b4a8f073a99ff49f80, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 61d675488000dcc46a78c58436f7e090, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

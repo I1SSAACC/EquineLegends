@@ -66,6 +66,7 @@
     {
         FixedUpdate,                                            // Update in FixedUpdate (for tracking rigidbodies).
         LateUpdate,                                             // Update in LateUpdate. (for tracking objects that are moved in Update)
+        Update,
     }
 
     public enum AimSide { Left = 1, Right = 2 }
