@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.IO;
 using UnityEngine;
 using Mirror;
@@ -51,7 +51,7 @@ public class AuthManager : NetworkBehaviour
 
     private void OnRegisterRequest(NetworkConnectionToClient conn, RegisterRequestMessage msg)
     {
-        Debug.Log("Запрос регистрации для логина: " + msg.login);
+        Debug.Log("Р—Р°РїСЂРѕСЃ СЂРµРіРёСЃС‚СЂР°С†РёРё РґР»СЏ Р»РѕРіРёРЅР°: " + msg.login);
 
         string hashedPassword = Utils.ComputeSHA512Hash(msg.password);
         AccountsDatabase db = LoadAccountsDatabase();
@@ -61,7 +61,7 @@ public class AuthManager : NetworkBehaviour
             RegisterResponseMessage response = new()
             {
                 success = false,
-                message = "Логин уже существует."
+                message = "Р›РѕРіРёРЅ СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚."
             };
 
             conn.Send(response);
@@ -94,16 +94,16 @@ public class AuthManager : NetworkBehaviour
         RegisterResponseMessage successResponse = new()
         {
             success = true,
-            message = "Регистрация успешна."
+            message = "Р РµРіРёСЃС‚СЂР°С†РёСЏ СѓСЃРїРµС€РЅР°."
         };
 
         conn.Send(successResponse);
-        Debug.Log("Регистрация успешна для логина: " + msg.login);
+        Debug.Log("Р РµРіРёСЃС‚СЂР°С†РёСЏ СѓСЃРїРµС€РЅР° РґР»СЏ Р»РѕРіРёРЅР°: " + msg.login);
     }
 
     private void OnLoginRequest(NetworkConnectionToClient conn, LoginRequestMessage msg)
     {
-        Debug.Log("Запрос авторизации для логина: " + msg.login);
+        Debug.Log("Р—Р°РїСЂРѕСЃ Р°РІС‚РѕСЂРёР·Р°С†РёРё РґР»СЏ Р»РѕРіРёРЅР°: " + msg.login);
 
         string hashedPassword = Utils.ComputeSHA512Hash(msg.password);
         AccountsDatabase db = LoadAccountsDatabase();
@@ -116,7 +116,7 @@ public class AuthManager : NetworkBehaviour
         if (account == null)
         {
             response.success = false;
-            response.message = "Аккаунт не найден.";
+            response.message = "РђРєРєР°СѓРЅС‚ РЅРµ РЅР°Р№РґРµРЅ.";
             conn.Send(response);
             return;
         }
@@ -124,24 +124,24 @@ public class AuthManager : NetworkBehaviour
         if (account.passwordHash != hashedPassword)
         {
             response.success = false;
-            response.message = "Неверный пароль.";
+            response.message = "РќРµРІРµСЂРЅС‹Р№ РїР°СЂРѕР»СЊ.";
             conn.Send(response);
             return;
         }
 
-        // Загружаем PlayerData с диска
+        // Р—Р°РіСЂСѓР¶Р°РµРј PlayerData СЃ РґРёСЃРєР°
         PlayerData pd = LoadPlayerData(account.id);
         if (pd == null)
         {
             response.success = false;
-            response.message = "Ошибка загрузки данных игрока.";
+            response.message = "РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С… РёРіСЂРѕРєР°.";
             conn.Send(response);
             return;
         }
 
-        // Формируем успешный ответ
+        // Р¤РѕСЂРјРёСЂСѓРµРј СѓСЃРїРµС€РЅС‹Р№ РѕС‚РІРµС‚
         response.success = true;
-        response.message = "Авторизация успешна.";
+        response.message = "РђРІС‚РѕСЂРёР·Р°С†РёСЏ СѓСЃРїРµС€РЅР°.";
         response.accountId = account.id;
         response.nickname = pd.nickname;
         response.gameCurrency = pd.gameCurrency;
@@ -149,7 +149,7 @@ public class AuthManager : NetworkBehaviour
         response.level = pd.level;
 
         conn.Send(response);
-        Debug.Log("Авторизация успешна для логина: " + msg.login);
+        Debug.Log("РђРІС‚РѕСЂРёР·Р°С†РёСЏ СѓСЃРїРµС€РЅР° РґР»СЏ Р»РѕРіРёРЅР°: " + msg.login);
     }
 
     private AccountsDatabase LoadAccountsDatabase()
@@ -196,13 +196,13 @@ public class AuthManager : NetworkBehaviour
         }
         else
         {
-            Debug.LogWarning("Отсутствует файл данных игрока по пути: " + path);
+            Debug.LogWarning("РћС‚СЃСѓС‚СЃС‚РІСѓРµС‚ С„Р°Р№Р» РґР°РЅРЅС‹С… РёРіСЂРѕРєР° РїРѕ РїСѓС‚Рё: " + path);
             return null;
         }
     }
 
     private void OnRegisterResponse(RegisterResponseMessage msg) =>
-        Debug.Log("Ответ регистрации (клиент): " + msg.message);
+        Debug.Log("РћС‚РІРµС‚ СЂРµРіРёСЃС‚СЂР°С†РёРё (РєР»РёРµРЅС‚): " + msg.message);
 
     private void OnLoginResponse(LoginResponseMessage msg)
     {
@@ -217,7 +217,7 @@ public class AuthManager : NetworkBehaviour
             level = msg.level
         };
 
-        // Запускаем переход на загрузку сцены
+        // Р—Р°РїСѓСЃРєР°РµРј РїРµСЂРµС…РѕРґ РЅР° Р·Р°РіСЂСѓР·РєСѓ СЃС†РµРЅС‹
         SceneTransitionManager.Instance.StartGameLoad();
     }
 }

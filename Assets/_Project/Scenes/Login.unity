@@ -2638,7 +2638,7 @@ Transform:
   m_GameObject: {fileID: 899305812}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 892.8795, y: 482.30072, z: 372036.78}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3008,6 +3008,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1132310916}
   - component: {fileID: 1132310915}
+  - component: {fileID: 1132310917}
   m_Layer: 0
   m_Name: SceneManager
   m_TagString: Untagged
@@ -3027,6 +3028,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b2a3caec8502344d955764f5187aba7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   progressSmoothSpeed: 1.5
   loadingCanvas: {fileID: 1064638843}
   loadingSlider: {fileID: 8142555459944182381}
@@ -3048,6 +3052,23 @@ Transform:
   - {fileID: 1064638842}
   m_Father: {fileID: 1578449632}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1132310917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1132310914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 203313910
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &1141399689
 GameObject:
   m_ObjectHideFlags: 0
@@ -4244,8 +4265,8 @@ MonoBehaviour:
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 7848635022471504570, guid: c7db57d7cc22c434eb042f4f2f5c9545, type: 3}
-  autoCreatePlayer: 1
+  playerPrefab: {fileID: 8235969041864579292, guid: ab669b21ffe221545a4de8781a702bbc, type: 3}
+  autoCreatePlayer: 0
   playerSpawnMethod: 0
   spawnPrefabs: []
   exceptionsDisconnect: 1
@@ -8557,7 +8578,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0.7
+  m_Value: 0.15
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -8604,7 +8625,7 @@ MonoBehaviour:
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 0
-  m_FillAmount: 0.7
+  m_FillAmount: 0.15
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0

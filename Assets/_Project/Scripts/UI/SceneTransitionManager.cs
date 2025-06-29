@@ -2,8 +2,10 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Mirror;
+using Unity.VisualScripting;
 
-public class SceneTransitionManager : MonoBehaviour
+public class SceneTransitionManager : NetworkBehaviour
 {
     public float progressSmoothSpeed = 1.5f;
 
@@ -30,7 +32,7 @@ public class SceneTransitionManager : MonoBehaviour
         {
             loadingSlider.minValue = 0f;
             loadingSlider.maxValue = 1f;
-            loadingSlider.value = 0f;
+            loadingSlider.value = 0.15f;
         }
 
         StartCoroutine(LoadGameCoroutine());
@@ -75,6 +77,8 @@ public class SceneTransitionManager : MonoBehaviour
 
         while (!op.isDone)
             yield return null;
+
+        NetworkClient.Send(new MovePlayerMessage());
 
         yield return new WaitForSeconds(0.2f);
 

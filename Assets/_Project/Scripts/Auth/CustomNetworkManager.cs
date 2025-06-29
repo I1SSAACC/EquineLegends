@@ -1,12 +1,12 @@
-using System.Linq;
+п»їusing System.Linq;
 using Mirror;
 using UnityEngine;
+public struct MovePlayerMessage : NetworkMessage { }
 
 public class CustomNetworkManager : NetworkManager
 {
-    [SerializeField] private bool autoStartServer = false;
-    [SerializeField] private bool maintenanceMode = false;
-
+    [SerializeField] private bool autoStartServer;
+    [SerializeField] private bool maintenanceMode;
     private bool hasDisconnectedClients = false;
 
     public override void Start()
@@ -14,22 +14,32 @@ public class CustomNetworkManager : NetworkManager
         base.Start();
         if (autoStartServer)
         {
-            Debug.Log("Auto Start включен: запускаем сервер.");
+            Debug.Log("Auto Start РІРєР»СЋС‡РµРЅ: Р·Р°РїСѓСЃРєР°РµРј СЃРµСЂРІРµСЂ.");
             StartServer();
         }
         else
         {
-            Debug.Log("Auto Start выключен: запускаем клиента.");
+            Debug.Log("Auto Start РІС‹РєР»СЋС‡РµРЅ: Р·Р°РїСѓСЃРєР°РµРј РєР»РёРµРЅС‚Р°.");
             StartClient();
         }
+    }
+
+    public override void OnStartServer()
+    {
+        NetworkServer.RegisterHandler<MovePlayerMessage>(OnMovePlayerMessage, false);
+    }
+
+    void OnMovePlayerMessage(NetworkConnectionToClient conn, MovePlayerMessage msg)
+    {
+        GameObject player = Instantiate(playerPrefab);
+        NetworkServer.AddPlayerForConnection(conn, player);
     }
 
     public void ToggleMaintenanceMode(bool active)
     {
         maintenanceMode = active;
         hasDisconnectedClients = false;
-        Debug.Log("Режим ТО " + (maintenanceMode ? "включён" : "выключён"));
-
+        Debug.Log("Р РµР¶РёРј РўРћ " + (maintenanceMode ? "РІРєР»СЋС‡С‘РЅ" : "РІС‹РєР»СЋС‡С‘РЅ"));
         if (maintenanceMode)
             DisconnectAllClients();
     }
@@ -39,33 +49,41 @@ public class CustomNetworkManager : NetworkManager
         if (maintenanceMode)
         {
             conn.Send(new MaintenanceMessage { active = true });
-            Debug.Log("Новый игрок подключился, но сервер в режиме ТО. Отключаем.");
+            Debug.Log("РќРѕРІС‹Р№ РёРіСЂРѕРє РїРѕРґРєР»СЋС‡РёР»СЃСЏ, РЅРѕ СЃРµСЂРІРµСЂ РІ СЂРµР¶РёРјРµ РўРћ. РћС‚РєР»СЋС‡Р°РµРј.");
             conn.Disconnect();
             return;
         }
-
         base.OnServerConnect(conn);
     }
 
     public override void Update()
     {
-        if (maintenanceMode && !hasDisconnectedClients && NetworkServer.active && NetworkServer.connections.Count > 0)
+        if (maintenanceMode
+            && !hasDisconnectedClients
+            && NetworkServer.active
+            && NetworkServer.connections.Count > 0)
+        {
             DisconnectAllClients();
+        }
     }
 
     private void DisconnectAllClients()
     {
-        Debug.Log("Режим ТО активен — отключаем всех подключённых клиентов.");
+        Debug.Log("Р РµР¶РёРј РўРћ Р°РєС‚РёРІРµРЅ вЂ” РѕС‚РєР»СЋС‡Р°РµРј РІСЃРµС… РїРѕРґРєР»СЋС‡С‘РЅРЅС‹С… РєР»РёРµРЅС‚РѕРІ.");
         var connections = NetworkServer.connections.Values.ToList();
-
         for (int i = 0; i < connections.Count; i++)
         {
             var conn = connections[i];
             conn.Send(new MaintenanceMessage { active = true });
             conn.Disconnect();
         }
-
         hasDisconnectedClients = true;
+    }
+
+    public void SpawnPlayer(NetworkConnectionToClient conn)
+    {
+        GameObject player = Instantiate(playerPrefab);
+        NetworkServer.AddPlayerForConnection(conn, player);
     }
 }
 
