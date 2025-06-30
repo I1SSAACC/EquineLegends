@@ -1,115 +1,110 @@
+using Mirror;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Mirror;
-using Unity.VisualScripting;
 
 public class SceneTransitionManager : NetworkBehaviour
 {
-    public float progressSmoothSpeed = 1.5f;
+    [SerializeField] private CanvasGroup _loadingCanvas;
+    [SerializeField] private Slider _loadingSlider;
+    [SerializeField] private string _gameSceneName = "Game";
+    [SerializeField] private float _progressSmoothSpeed = 1.5f;
+    [SerializeField] private float _fadeDuration = 0.5f;
 
-    public CanvasGroup loadingCanvas;
-    public Slider loadingSlider;
-    public string gameSceneName = "Game";
-    public float fadeDuration = 0.5f;
+    public static SceneTransitionManager Instance { get; private set; }
 
     private void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
-        if (loadingCanvas != null) DontDestroyOnLoad(loadingCanvas.gameObject);
-        if (loadingSlider != null) DontDestroyOnLoad(loadingSlider.gameObject);
-        if (loadingCanvas != null) loadingCanvas.gameObject.SetActive(false);
+        _loadingCanvas.gameObject.SetActive(false);
     }
 
     public void StartGameLoad()
     {
-        if (loadingCanvas != null)
-            loadingCanvas.gameObject.SetActive(true);
-
-        if (loadingSlider != null)
-        {
-            loadingSlider.minValue = 0f;
-            loadingSlider.maxValue = 1f;
-            loadingSlider.value = 0.15f;
-        }
-
-        StartCoroutine(LoadGameCoroutine());
+        _loadingCanvas.gameObject.SetActive(true);
+        StartCoroutine(LoadGameRoutine());
     }
 
-    private IEnumerator LoadGameCoroutine()
+    private IEnumerator LoadGameRoutine()
     {
-        yield return FadeCanvas(loadingCanvas, 0f, 1f);
+        AsyncOperation operation = SceneManager.LoadSceneAsync(_gameSceneName);
+        operation.allowSceneActivation = false;
 
-        var op = SceneManager.LoadSceneAsync(gameSceneName);
-        op.allowSceneActivation = false;
+        yield return FadeCanvas(_loadingCanvas, 0f, 1f);
+        _loadingSlider.value = 0f;
 
-        float displayedProgress = 0f;
-
-        while (op.progress < 0.9f)
+        while (operation.progress < 0.15f)
         {
-            float targetProgress = Mathf.Clamp01(op.progress / 0.9f);
-
-            displayedProgress = Mathf.MoveTowards(
-                displayedProgress,
-                targetProgress,
-                Time.deltaTime * progressSmoothSpeed
-            );
-
-            loadingSlider.value = displayedProgress;
+            UpdateSliderProgress(Mathf.Clamp01(0.15f));
             yield return null;
         }
 
-        while (displayedProgress < 1f)
-        {
-            displayedProgress = Mathf.MoveTowards(
-                displayedProgress,
-                1f,
-                Time.deltaTime * progressSmoothSpeed
-            );
+        //while (operation.progress < 0.9f)
+        //{
+        //    UpdateSliderProgress(Mathf.Clamp01(operation.progress / 0.9f));
+        //    yield return null;
+        //}
 
-            loadingSlider.value = displayedProgress;
+        while (operation.progress < 1f)
+        {
+            UpdateSliderProgress(Mathf.Clamp01(operation.progress));
             yield return null;
         }
 
-        op.allowSceneActivation = true;
+        operation.allowSceneActivation = true;
 
-        while (!op.isDone)
+        while (operation.isDone == false)
             yield return null;
 
         NetworkClient.Send(new MovePlayerMessage());
 
         yield return new WaitForSeconds(0.2f);
-
-        yield return FadeCanvas(loadingCanvas, 1f, 0f);
-        loadingCanvas.interactable = false;
-        loadingCanvas.blocksRaycasts = false;
-
+        yield return FadeCanvas(_loadingCanvas, 1f, 0f);
+        _loadingCanvas.gameObject.SetActive(false);
         InitializeGameUI();
     }
 
-    private IEnumerator FadeCanvas(CanvasGroup cg, float from, float to)
+    private IEnumerator FadeCanvas(CanvasGroup canvasGroup, float from, float to)
     {
-        if (cg == null) yield break;
         float elapsed = 0f;
-        cg.alpha = from;
-        while (elapsed < fadeDuration)
+        canvasGroup.alpha = from;
+
+        while (elapsed < _fadeDuration)
         {
             elapsed += Time.deltaTime;
-            cg.alpha = Mathf.Lerp(from, to, elapsed / fadeDuration);
+            canvasGroup.alpha = Mathf.Lerp(from, to, elapsed / _fadeDuration);
             yield return null;
         }
 
-        cg.alpha = to;
+        canvasGroup.alpha = to;
+    }
+
+    private void UpdateSliderProgress(float targetProgress)
+    {
+        _loadingSlider.value = Mathf.MoveTowards(
+            _loadingSlider.value,
+            targetProgress,
+            Time.deltaTime * _progressSmoothSpeed
+        );
     }
 
     private void InitializeGameUI()
     {
-        var gameUI = FindObjectOfType<GameUI>();
-        if (gameUI != null && AuthManager.Instance.CurrentPlayerData != null)
-            gameUI.SetupPlayerInfo(AuthManager.Instance.CurrentPlayerData);
-    }
+        GameUI gameUI = FindFirstObjectByType<GameUI>();
 
-    public static SceneTransitionManager Instance { get; private set; }
+        if (gameUI == null)
+            throw new System.InvalidOperationException("GameUI: не был найден на загруженной сцене");
+
+        if (AuthManager.Instance.CurrentPlayerData == null)
+            throw new System.InvalidOperationException("CurrentPlayerData: отсутствуют данные игрока");
+
+        gameUI.SetupPlayerInfo(AuthManager.Instance.CurrentPlayerData);
+    }
 }

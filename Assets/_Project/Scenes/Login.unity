@@ -2932,8 +2932,8 @@ CanvasGroup:
   m_GameObject: {fileID: 1064638841}
   m_Enabled: 1
   m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
 --- !u!114 &1064638844
 MonoBehaviour:
@@ -3031,11 +3031,11 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  progressSmoothSpeed: 1.5
-  loadingCanvas: {fileID: 1064638843}
-  loadingSlider: {fileID: 8142555459944182381}
-  gameSceneName: Game
-  fadeDuration: 0.5
+  _loadingCanvas: {fileID: 1064638843}
+  _loadingSlider: {fileID: 8142555459944182381}
+  _gameSceneName: Game
+  _progressSmoothSpeed: 1.5
+  _fadeDuration: 0.5
 --- !u!4 &1132310916
 Transform:
   m_ObjectHideFlags: 0
@@ -8578,7 +8578,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0.15
+  m_Value: 0.5
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -8625,7 +8625,7 @@ MonoBehaviour:
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 0
-  m_FillAmount: 0.15
+  m_FillAmount: 0.5
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
