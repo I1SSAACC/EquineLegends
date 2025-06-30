@@ -6,11 +6,13 @@ using UnityEngine.UI;
 
 public class SceneTransitionManager : NetworkBehaviour
 {
+    public float ActivationThreshold = 0.9f;
+
     [SerializeField] private CanvasGroup _loadingCanvas;
     [SerializeField] private Slider _loadingSlider;
     [SerializeField] private string _gameSceneName = "Game";
     [SerializeField] private float _progressSmoothSpeed = 1.5f;
-    [SerializeField] private float _fadeDuration = 0.5f;
+    [SerializeField] private float _fadeDuration = 1f;
 
     public static SceneTransitionManager Instance { get; private set; }
 
@@ -40,9 +42,10 @@ public class SceneTransitionManager : NetworkBehaviour
         yield return FadeCanvas(_loadingCanvas, 0f, 1f);
         _loadingSlider.value = 0f;
 
-        while (operation.progress < 0.15f)
+        while (operation.progress < ActivationThreshold)
         {
-            UpdateSliderProgress(Mathf.Clamp01(0.15f));
+            float normalized = Mathf.Clamp01(operation.progress / ActivationThreshold);
+            UpdateSliderProgress(normalized);
             yield return null;
         }
 
@@ -52,9 +55,9 @@ public class SceneTransitionManager : NetworkBehaviour
         //    yield return null;
         //}
 
-        while (operation.progress < 1f)
+        while (_loadingSlider.value < 1f)
         {
-            UpdateSliderProgress(Mathf.Clamp01(operation.progress));
+            UpdateSliderProgress(1f);
             yield return null;
         }
 
